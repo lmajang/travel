@@ -394,7 +394,7 @@ Future<Text> fetchDataAndBuildText() async {
   final res1 = await FlutterZLocation.geocodeCoordinate(
       coordinate.latitude, coordinate.longitude, pathHead: 'assets/');
   final ipText = Text(
-    res1.province,
+    res1.province+res1.city+res1.district,
     style: TextStyle(
         fontWeight: FontWeight.w500, fontSize: 15),
   );

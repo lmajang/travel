@@ -1,5 +1,7 @@
 
 import 'dart:async';
+import 'dart:collection';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -7,8 +9,13 @@ import 'package:amap_flutter_map/amap_flutter_map.dart';
 import 'package:amap_flutter_base/amap_flutter_base.dart';
 import 'package:amap_flutter_location/amap_flutter_location.dart';
 import 'package:amap_flutter_location/amap_location_option.dart';
+import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:travel/common/Config.dart';
+import 'package:url_launcher/url_launcher_string.dart';
+import 'package:http/http.dart' as http;
+
 
 class mapScreen extends StatefulWidget {
   const mapScreen({super.key});
@@ -28,6 +35,11 @@ class _mapScreenState extends State<mapScreen>{
   String adCode = ""; // 邮编
   String address = ""; // 详细地址
   String cityCode = ""; //区号
+  late LatLng userPosition;
+  //目的地
+  bool getPositionPermission = false;
+  final LatLng destination = LatLng(39.90816,116.434446);
+  LatLng center = LatLng(39.90816,116.434446);
   // 实例化
   final AMapFlutterLocation _locationPlugin = AMapFlutterLocation();
   // 监听定位
@@ -39,7 +51,7 @@ class _mapScreenState extends State<mapScreen>{
     super.initState();
 
     /// 动态申请定位权限
-    requestPermission();
+    //requestPermission();
 
     ///iOS 获取native精度类型
     if (Platform.isIOS) {
@@ -69,15 +81,26 @@ class _mapScreenState extends State<mapScreen>{
         adCode = result['adCode'].toString();
         address = result['address'].toString();
         cityCode = result['cityCode'].toString();
+
+        double do_latitude = double.parse(_latitude);
+        double do_longitude = double.parse(_longitude);
+        String str_latitude = do_latitude.toStringAsFixed(6);
+        String str_longitude = do_longitude.toStringAsFixed(6);
+        userPosition = LatLng(double.parse(str_latitude), double.parse(str_longitude));
+        print(str_longitude);
+        _UserMarker(userPosition);
       });
     });
+
   }
 
   @override
   void dispose() {
     super.dispose();
-
     ///移除定位监听
+    if (null != _locationListener) {
+      _locationListener.cancel();
+    }
     if (null != _locationListener) {
       _locationListener.cancel();
     }
@@ -94,6 +117,8 @@ class _mapScreenState extends State<mapScreen>{
     bool hasLocationPermission = await requestLocationPermission();
     if (hasLocationPermission) {
       print("定位权限申请通过");
+      // getPositionPermission = true;
+      // _startLocation();
     } else {
       print("定位权限申请不通过");
     }
@@ -173,7 +198,6 @@ class _mapScreenState extends State<mapScreen>{
       ///开始定位之前设置定位参数
       _setLocationOption();
       _locationPlugin.startLocation();
-
     }
   }
 
@@ -183,25 +207,94 @@ class _mapScreenState extends State<mapScreen>{
       _locationPlugin.stopLocation();
     }
   }
+  List<Marker> _markers = [];
+
+  ///添加一个marker
+  void _UserMarker(LatLng UserPosition) {
+    final _markerPosition = UserPosition;
+    print(_markerPosition);
+    final Marker marker = Marker(
+      position: _markerPosition,
+      //使用默认hue的方式设置Marker的图标
+      icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueYellow),
+    );
+    //调用setState触发AMapWidget的更新，从而完成marker的添加
+    setState(() {
+      if(_markers.length>1){
+        _markers.removeLast();
+      }
+      //将新的marker添加到map里
+      _markers.add(marker);
+
+    });
+  }
+
+  //添加路径
+  final Map<String, Polyline> _polylines = <String, Polyline>{};
+
+  List<LatLng> LatLng_points =[];
+
+  Future<void> _structure_line(LatLng origin, LatLng destination) async {
+
+    LatLng_points = await _getAMapPointData(origin,destination);
+    LatLng_points.insert(0, origin);
+    LatLng_points.add(destination);
+    final Polyline polyline = Polyline(
+        width: 15,
+        customTexture: 
+              BitmapDescriptor.fromIconPath('assets/images/wenli.png'),
+        color: Colors.greenAccent,
+        joinType: JoinType.round,
+        points: LatLng_points,
+        );
+    setState(() {
+      _polylines[polyline.id] = polyline;
+    });
+  }
 
 
 
-  static final CameraPosition _kInitialPosition = const CameraPosition(
-    target: LatLng(30.22753386223114, 120.04012871067401),//39.909187 116.397451 30.22753386223114, 120.04012871067401
-    zoom: 10.0,
-  );
   List<Widget> _approvalNumberWidget = [];
   late Size screenSize= MediaQuery.of(context).size;
+
+
   @override
   Widget build(BuildContext context) {
+    Size scrSize = MediaQuery.of(context).size;
+
+    CameraPosition _kInitialPosition = CameraPosition(
+        target: center,//39.909187 116.397451 30.22753386223114, 120.04012871067401
+        zoom: 25.0,
+        //俯仰角0°~45°（垂直与地图时为0）
+        tilt: 30,
+        //偏航角 0~360° (正北方为0)
+        bearing: 0
+    );
+
+    final Marker de_marker = Marker(
+      position: destination,
+      //使用默认hue的方式设置Marker的图标
+      icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueOrange),
+    );
+    if(_markers.isEmpty)
+        _markers.add(de_marker);
+
     ///使用默认属性创建一个地图
     final AMapWidget map = AMapWidget(
       privacyStatement: mapConfig.amapPrivacyStatement,
       initialCameraPosition: _kInitialPosition,
       onMapCreated: onMapCreated,
+      markers: Set<Marker>.of(_markers),
+      polylines: Set<Polyline>.of(_polylines.values),
     );
-    return Scaffold(
-        body: SafeArea(
+
+    return MaterialApp(
+      //
+      navigatorObservers: [FlutterSmartDialog.observer],
+        //
+      builder: FlutterSmartDialog.init(),
+      home:Scaffold(
+          body: SafeArea(
             child: Stack(
                 children:[
                   Container(
@@ -213,40 +306,66 @@ class _mapScreenState extends State<mapScreen>{
                       padding: const EdgeInsets.only(
                           top: 40, left: 20, right: 20),
                       child: Column(
-                          children:[
-                            Column(
                                 children:[
-                                  Text("经度:$_longitude"),
-                                  Text("纬度:$_latitude"),
-                                  Text('国家：$country'),
-                                  Text('省份：$province'),
-                                  Text('城市：$city'),
-                                  Text('区：$district'),
-                                  Text('城市编码：$cityCode'),
-                                  Text('街道：$street'),
-                                  Text('邮编：$adCode'),
-                                  Text('详细地址：$address'),
-                                  SizedBox(height: 20),
-                                ]
-                            ),
-                            ElevatedButton(
-                              child: const Text('开始定位'),
-                              onPressed: () {
-                                _startLocation();
-                              },
-                            ),
-                            ElevatedButton(
-                              child: const Text('停止定位'),
-                              onPressed: () {
-                                _stopLocation();
-                              },
-                            ),
+                                  // Column(
+                                  //     children:[
+                                  //       Text("经度:$_longitude"),
+                                  //       Text("纬度:$_latitude"),
+                                  //       SizedBox(height: 20),
+                                  //     ]
+                                  // ),
+                                Padding(
+                                  padding: EdgeInsets.only(
+                                      top: scrSize.height-140, left: scrSize.width-110),
+                                  child:ElevatedButton(
+                                    style: ElevatedButton.styleFrom(
+                                      shape: CircleBorder(), // 圆形按钮
+                                      backgroundColor:Colors.grey,
+                                      minimumSize: Size(20,40),
+                                    ),
+                                    child: Center(
+                                        child: Icon(
+                                            Icons.directions_walk,
+                                            color: Colors.white, // 图标的颜色
+                                          ),
+                                    ),
+                                    onPressed: () {
+                                      if(!getPositionPermission)
+                                        showGetPositionDialog();
+                                      if(!getPositionPermission) return;
+                                      _structure_line(userPosition, destination);
+                                      setState(() {
+                                        center = userPosition;
+                                        _mapController.moveCamera(CameraUpdate.newCameraPosition(
+                                          CameraPosition(
+                                            //中心点
+                                              target: center,
+                                              //缩放级别
+                                              zoom: 18,
+                                              //俯仰角0°~45°（垂直与地图时为0）
+                                              tilt: 30,
+                                              //偏航角 0~360° (正北方为0)
+                                              bearing: 0),
+                                            )
+                                          );
+      ;                                  }
+                                      );
+                                    },
+                                  ),
+                          ),
+                            // ElevatedButton(
+                            //   child: const Text('停止定位'),
+                            //   onPressed: () {
+                            //     _stopLocation();
+                            //   },
+                            // ),
                           ]
                       )
                   )
                 ]
             )
         )
+      )
     );
   }
   late AMapController _mapController;
@@ -289,5 +408,79 @@ class _mapScreenState extends State<mapScreen>{
       print("未知定位类型");
     }
   }
+
+  Future<List<LatLng>> _getAMapPointData(LatLng origin,LatLng destination) async {
+    String url ='https://restapi.amap.com/v3/direction/walking?origin=${origin.longitude},${origin.latitude}&destination=${destination.longitude},${destination.latitude}&key=${mapConfig.lineKey}';
+    var response = await http.get(Uri.parse(url));
+    if (response.statusCode == 200) {
+      Map map = json.decode(response.body);
+      List<LatLng> points = <LatLng>[];
+      List<String> str_points = <String>[];
+      List<String> point_coord = <String>[];
+
+      for(int i =0;i<map['route']['paths'][0]['steps'].length;i++){
+        str_points = map['route']['paths'][0]['steps'][i]['polyline'].split(';');
+        for(int j=0;j<str_points.length;j++){
+          point_coord = str_points[j].split(',');
+          points.add(LatLng(double.parse(point_coord[1]),double.parse(point_coord[0])));
+        }
+      }
+      return points;
+    }
+    else{
+      print('Error: ${response.statusCode}');
+      throw Exception('${response.statusCode}');
+    }
+  }
+
+  void showGetPositionDialog(){
+    SmartDialog.show(
+      backDismiss: false,
+      clickMaskDismiss: false,
+      builder: (_) {
+        return Container(
+          height: 300,
+          width: 300,
+          padding: EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20),
+            color: Colors.white,
+          ),
+          alignment: Alignment.topCenter,
+          child: SingleChildScrollView(
+            child: Wrap(
+              direction: Axis.vertical,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              spacing: 10,
+              children: [
+                // title
+                Text(
+                  '提示',
+                  style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
+                ),
+                // content
+                Text('现在将获取你的定位，请确定是否同意'),
+
+                // button (only method of close the dialog)
+                ElevatedButton(
+                  onPressed: () {
+                    getPositionPermission =true;
+                    _startLocation();
+                    SmartDialog.dismiss();
+                  },
+                  child: Text('同意'),
+                ),
+                ElevatedButton(
+                  onPressed: () => SmartDialog.dismiss(),
+                  child: Text('取消'),
+                )
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
 }
 
