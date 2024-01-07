@@ -38,6 +38,22 @@ dependencies:
   google_fonts: ^6.1.0
   get: ^4.6.6
   curved_navigation_bar: ^1.0.3
+  getwidget: ^2.0.4
+  tdesign_flutter: ^0.1.0
+  flukit: ^3.0.1
+  image_picker: ^1.0.6
+  video_player: ^2.8.2
+  insta_assets_picker: ^2.2.1
+  insta_assets_crop: ^0.0.2 # custom package from image_crop
+  fraction: ^5.0.2 # to show crop ratio in crop view
+  wechat_assets_picker: ^8.8.0
+  provider: ^6.0.5 # match with wechat_assets_picker package
+  extended_image: ^8.1.0 # match with wechat_assets_picker package
+  path: ^1.8.3
+  camera: ^0.10.5+5
+  wechat_camera_picker: ^4.1.1
+  photo_manager: ^3.0.0-dev.2
+  flutter_instagram_storyboard: ^0.0.8
 
 dev_dependencies:
   flutter_test:
@@ -62,6 +78,18 @@ flutter:
   uses-material-design: true
   assets:
     - assets/images/
+  fonts:
+    - family: Finesse
+      fonts:
+        - asset: assets/fonts/Finesse-Flair.otf
+        - asset: assets/fonts/Finesse-Italic.otf
+          style: italic
+    - family: StMarie
+      fonts:
+        - asset: assets/fonts/StMarie-Thin.otf
+    - family: YatraOne
+      fonts:
+        - asset: assets/fonts/YatraOne-Regular.ttf
 
   # To add assets to your application, add an assets section, like this:
   # assets:

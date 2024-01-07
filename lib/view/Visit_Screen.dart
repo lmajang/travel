@@ -25,7 +25,8 @@ class _VistiScreenState extends State<VistiScreen> {
                     height: 650,
                     decoration: const BoxDecoration(
                         image: DecorationImage(
-                      image: AssetImage("assets/images/test.jpg"),
+                        image: NetworkImage('https://t7.baidu.com/it/u=1956604245,3662848045&fm=193&f=GIF'),
+                      //image: AssetImage("assets/images/test.jpg"),
                       fit: BoxFit.cover,
                     )),
                     child: Column(
