@@ -38,6 +38,24 @@ dependencies:
   google_fonts: ^6.1.0
   get: ^4.6.6
   curved_navigation_bar: ^1.0.3
+  drag_container: ^2.0.0
+  bottom_sheet: ^4.0.0
+    # 地图
+  amap_flutter_location: ^3.0.0
+  amap_flutter_map: ^3.0.0
+  amap_flutter_base: ^3.0.0
+  #权限请求
+  permission_handler: ^10.2.0
+  #get
+  #get: ^4.6.5
+  flutter_easyloading: ^3.0.5
+  flutter_screenutil: ^5.6.0
+  flutter_z_location: ^0.0.9
+  url_launcher: ^6.2.2
+  fluttertoast: ^8.2.4
+  http: ^1.1.2
+  flutter_smart_dialog: ^4.9.6
+
   getwidget: ^2.0.4
   tdesign_flutter: ^0.1.0
   flukit: ^3.0.1
@@ -78,6 +96,11 @@ flutter:
   uses-material-design: true
   assets:
     - assets/images/
+    - assets/province/
+    - assets/ip/
+    - assets/city/
+    - assets/district/
+    - assets/areaList/
   fonts:
     - family: Finesse
       fonts:

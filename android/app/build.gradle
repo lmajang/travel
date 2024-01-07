@@ -64,4 +64,10 @@ flutter {
     source '../..'
 }
 
-dependencies {}
+dependencies {
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    implementation('com.amap.api:location:5.2.0')
+    implementation('com.amap.api:3dmap:8.1.0')
+    implementation 'com.amap.api:search:5.0.0'
+    //implementation 'com.amap.api:navi-3dmap:latest.integration'
+}
