@@ -8,8 +8,12 @@ import 'package:getwidget/getwidget.dart';
 import 'package:tdesign_flutter/tdesign_flutter.dart';
 import 'package:flukit/flukit.dart';
 import 'package:travel/view/test.dart';
+import 'package:travel/widgets/insta_picker_interface.dart';
+import 'package:insta_assets_picker/insta_assets_picker.dart';
+import 'package:wechat_camera_picker/wechat_camera_picker.dart';
+import 'package:travel/widgets/crop_result_view.dart';
 
-import '../widgets/crop_result_view.dart';
+import '../main.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -21,6 +25,33 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _page = 0;
   GlobalKey<CurvedNavigationBarState> _bottomNavigationKey = GlobalKey();
+  PickerDescription get description => const PickerDescription(
+    icon: '📸',
+    label: 'WeChat Camera Picker',
+    description: 'Picker with a camera button.\n'
+        'The camera logic is handled by the `wechat_camera_picker` package.',
+  );
+
+  /// Needs a [BuildContext] that is coming from the picker
+  Future<AssetEntity?> _pickFromWeChatCamera(BuildContext context) =>
+      CameraPicker.pickFromCamera(
+        context,
+        locale: Localizations.maybeLocaleOf(context),
+        pickerConfig: CameraPickerConfig(theme: Theme.of(context)),
+      );
+
+  ThemeData getPickerTheme(BuildContext context) {
+    return InstaAssetPicker.themeData(kDefaultColor).copyWith(
+      appBarTheme: const AppBarTheme(titleTextStyle: TextStyle(fontSize: 16)),
+      textButtonTheme: TextButtonThemeData(
+        style: TextButton.styleFrom(
+          foregroundColor: Colors.blue,
+          disabledForegroundColor: Colors.grey,
+        ),
+      ),
+    );
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -33,8 +64,12 @@ class _HomeScreenState extends State<HomeScreen> {
         items:  <Widget>[
           Icon(TDIcons.home, size: 30),
           Icon(TDIcons.location, size: 30),
+            // onPressed: () {
+            //   Navigator.push(context,MaterialPageRoute(
+            //   builder: (context) => UploadScreen()));
+            // },
           GFIconButton(
-            icon:  Icon(
+            icon:  const Icon(
               TDIcons.add,
               color: Colors.black,
             ),
@@ -42,25 +77,73 @@ class _HomeScreenState extends State<HomeScreen> {
             //   Navigator.push(context,MaterialPageRoute(
             //   builder: (context) => UploadScreen()));
             // },
-            onPressed: () {
-              Navigator.push(
-                context,
-                PageRouteBuilder(
-                  pageBuilder: (context, animation, secondaryAnimation) {
-                    return WeChatCameraPicker();
-                  },
-                  transitionsBuilder: (context, animation, secondaryAnimation, child) {
-                    const begin = Offset(-1.0, 0.0);
-                    const end = Offset.zero;
-                    const curve = Curves.easeInOut;
-                    var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
-                    var offsetAnimation = animation.drive(tween);
-                    return SlideTransition(position: offsetAnimation, child: child);
-                  },
-                  transitionDuration: Duration(milliseconds: 500),
+            onPressed: () =>
+                InstaAssetPicker.pickAssets(
+                  context,
+                  //title: description.fullLabel,
+                  maxAssets: 10,
+                  pickerTheme: getPickerTheme(context),
+                  actionsBuilder: (
+                      BuildContext context,
+                      ThemeData? pickerTheme,
+                      double height,
+                      VoidCallback unselectAll,
+                      ) =>
+                  [
+                    InstaPickerCircleIconButton.unselectAll(
+                      onTap: unselectAll,
+                      theme: pickerTheme,
+                      size: height,
+                    ),
+                    const SizedBox(width: 8),
+                    InstaPickerCircleIconButton(
+                      onTap: () => _pickFromWeChatCamera(context),
+                      theme: pickerTheme,
+                      icon: const Icon(Icons.camera_alt),
+                      size: height,
+                    ),
+                  ],
+                  specialItemBuilder: (context, _, __) {
+                    // return a button that open the camera
+                    return ElevatedButton(
+                      onPressed: () async {
+                        Feedback.forTap(context);
+                        final AssetEntity? entity =
+                        await _pickFromWeChatCamera(context);
+                        if (entity == null) return;
+                            if (context.mounted) {
+                              await InstaAssetPicker.refreshAndSelectEntity(
+                                context,
+                                entity,
+                              );
+                            }
+                          },
+                        style: ElevatedButton.styleFrom(
+                            foregroundColor: Colors.white,
+                            backgroundColor: Colors.transparent,
+                        ),
+                      child: FittedBox(
+                        fit: BoxFit.cover,
+                        child: Text(
+                          InstaAssetPicker.defaultTextDelegate(context)
+                              .sActionUseCameraHint,
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    );
+                    },
+                  // since the list is revert, use prepend to be at the top
+                  specialItemPosition: SpecialItemPosition.prepend,
+                  onCompleted: (cropStream) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            PickerCropResultScreens(cropStream: cropStream),
+                      ),
+                    );
+                    },
                 ),
-              );
-            },
             type: GFButtonType.transparent,
           ),
           GFIconButton(
@@ -68,10 +151,6 @@ class _HomeScreenState extends State<HomeScreen> {
               TDIcons.calendar,
               color: Colors.black,
             ),
-            // onPressed: () {
-            //   Navigator.push(context,MaterialPageRoute(
-            //   builder: (context) => UploadScreen()));
-            // },
             onPressed: () {
               Navigator.push(
                 context,
@@ -119,6 +198,8 @@ class _HomeScreenState extends State<HomeScreen> {
         //   onPressed: () {},
         //   type: GFButtonType.transparent,
         // ),
+        automaticallyImplyLeading: false,
+        centerTitle: false,
         title: const Text(
           'TravelBy',
           style: TextStyle(
@@ -153,8 +234,9 @@ class _HomeScreenState extends State<HomeScreen> {
             type: GFButtonType.transparent,
           ),
         ],
-        backgroundColor: Colors.white,
+        backgroundColor: Colors.transparent,
         bottomOpacity: 0,
+        elevation: 0,
       ),
       body: SafeArea(
         child: SingleChildScrollView(

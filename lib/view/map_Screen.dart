@@ -51,7 +51,7 @@ class _mapScreenState extends State<mapScreen>{
     super.initState();
 
     /// 动态申请定位权限
-    //requestPermission();
+    requestPermission();
 
     ///iOS 获取native精度类型
     if (Platform.isIOS) {
@@ -333,7 +333,7 @@ class _mapScreenState extends State<mapScreen>{
                                       if(!getPositionPermission)
                                         showGetPositionDialog();
                                       if(!getPositionPermission) return;
-                                      _structure_line(userPosition, destination);
+                                      _structure_line(userPosition, destination);//userPosition
                                       setState(() {
                                         center = userPosition;
                                         _mapController.moveCamera(CameraUpdate.newCameraPosition(
