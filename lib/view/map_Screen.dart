@@ -13,8 +13,11 @@ import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:travel/common/Config.dart';
+import 'package:travel/view/test.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 import 'package:http/http.dart' as http;
+
+import '../aMap_tool/DistanceCalculator.dart';
 
 
 class mapScreen extends StatefulWidget {
@@ -36,6 +39,8 @@ class _mapScreenState extends State<mapScreen>{
   String address = ""; // 详细地址
   String cityCode = ""; //区号
   late LatLng userPosition;
+  late double UserandDestdistance = 10000000000000000;
+  bool isCheck = false;
   //目的地
   bool getPositionPermission = false;
   final LatLng destination = LatLng(39.90816,116.434446);
@@ -87,8 +92,9 @@ class _mapScreenState extends State<mapScreen>{
         String str_latitude = do_latitude.toStringAsFixed(6);
         String str_longitude = do_longitude.toStringAsFixed(6);
         userPosition = LatLng(double.parse(str_latitude), double.parse(str_longitude));
-        print(str_longitude);
         _UserMarker(userPosition);
+        UserandDestdistance =  DistanceCalculator.calculateDistance(userPosition.latitude,userPosition.longitude,destination.latitude,destination.longitude);
+        print(UserandDestdistance);
       });
     });
 
@@ -302,66 +308,77 @@ class _mapScreenState extends State<mapScreen>{
                     width: MediaQuery.of(context).size.width,
                     child: map,
                   ),
-                  Padding(
-                      padding: const EdgeInsets.only(
-                          top: 40, left: 20, right: 20),
-                      child: Column(
-                                children:[
-                                  // Column(
-                                  //     children:[
-                                  //       Text("经度:$_longitude"),
-                                  //       Text("纬度:$_latitude"),
-                                  //       SizedBox(height: 20),
-                                  //     ]
-                                  // ),
-                                Padding(
-                                  padding: EdgeInsets.only(
-                                      top: scrSize.height-140, left: scrSize.width-110),
-                                  child:ElevatedButton(
-                                    style: ElevatedButton.styleFrom(
-                                      shape: CircleBorder(), // 圆形按钮
-                                      backgroundColor:Colors.grey,
-                                      minimumSize: Size(20,40),
-                                    ),
-                                    child: Center(
-                                        child: Icon(
-                                            Icons.directions_walk,
-                                            color: Colors.white, // 图标的颜色
-                                          ),
-                                    ),
-                                    onPressed: () {
-                                      if(!getPositionPermission)
-                                        showGetPositionDialog();
-                                      if(!getPositionPermission) return;
-                                      _structure_line(userPosition, destination);
-                                      setState(() {
-                                        center = userPosition;
-                                        _mapController.moveCamera(CameraUpdate.newCameraPosition(
-                                          CameraPosition(
-                                            //中心点
-                                              target: center,
-                                              //缩放级别
-                                              zoom: 18,
-                                              //俯仰角0°~45°（垂直与地图时为0）
-                                              tilt: 30,
-                                              //偏航角 0~360° (正北方为0)
-                                              bearing: 0),
-                                            )
-                                          );
-      ;                                  }
-                                      );
-                                    },
-                                  ),
-                          ),
-                            // ElevatedButton(
-                            //   child: const Text('停止定位'),
-                            //   onPressed: () {
-                            //     _stopLocation();
-                            //   },
-                            // ),
-                          ]
-                      )
-                  )
+                  Positioned(
+                    top: scrSize.height - 150,
+                    left: scrSize.width - 70,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        if(isCheck){
+                          SmartDialog.showToast('你已经打过卡了');
+                          return;
+                        }
+                        if(UserandDestdistance>20){
+                          SmartDialog.showToast('打卡失败，请到目标点附近打卡');
+                          return;
+                        }
+                        else {
+                          SmartDialog.showToast('打卡成功');
+                          showUpPicDialog();
+                          isCheck = true;
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        shape: CircleBorder(), // 圆形按钮
+                        backgroundColor:Colors.grey,
+                        minimumSize: Size(20,40),
+                      ),
+                      child: Center(
+                        child: Icon(
+                          Icons.check_circle_outlined,
+                          color: Colors.white, // 图标的颜色
+                        ),
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    top: scrSize.height- 100,
+                    left: scrSize.width - 70,
+                    child:ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        shape: CircleBorder(), // 圆形按钮
+                        backgroundColor:Colors.grey,
+                        minimumSize: Size(20,40),
+                      ),
+                      child: Center(
+                        child: Icon(
+                          Icons.directions_walk,
+                          color: Colors.white, // 图标的颜色
+                        ),
+                      ),
+                      onPressed: () {
+                        if(!getPositionPermission)
+                          showGetPositionDialog();
+                        if(!getPositionPermission) return;
+                        _structure_line(userPosition, destination);
+                        setState(() {
+                          center = userPosition;
+                          _mapController.moveCamera(CameraUpdate.newCameraPosition(
+                            CameraPosition(
+                              //中心点
+                                target: center,
+                                //缩放级别
+                                zoom: 18,
+                                //俯仰角0°~45°（垂直与地图时为0）
+                                tilt: 30,
+                                //偏航角 0~360° (正北方为0)
+                                bearing: 0),
+                          )
+                          );
+                        }
+                        );
+                      },
+                    ),
+                  ),
                 ]
             )
         )
@@ -469,6 +486,70 @@ class _mapScreenState extends State<mapScreen>{
                     SmartDialog.dismiss();
                   },
                   child: Text('同意'),
+                ),
+                ElevatedButton(
+                  onPressed: () => SmartDialog.dismiss(),
+                  child: Text('取消'),
+                )
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void showUpPicDialog(){
+    SmartDialog.show(
+      backDismiss: false,
+      clickMaskDismiss: false,
+      builder: (_) {
+        return Container(
+          height: 300,
+          width: 300,
+          padding: EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20),
+            color: Colors.white,
+          ),
+          alignment: Alignment.topCenter,
+          child: SingleChildScrollView(
+            child: Wrap(
+              direction: Axis.vertical,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              spacing: 10,
+              children: [
+                // title
+                Text(
+                  '提示',
+                  style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
+                ),
+                // content
+                Text('是否需要分享图片'),
+
+                // button (only method of close the dialog)
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      PageRouteBuilder(
+                        pageBuilder: (context, animation, secondaryAnimation) {
+                          return WeChatCameraPicker();
+                        },
+                        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                          const begin = Offset(-1.0, 0.0);
+                          const end = Offset.zero;
+                          const curve = Curves.easeInOut;
+                          var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+                          var offsetAnimation = animation.drive(tween);
+                          return SlideTransition(position: offsetAnimation, child: child);
+                        },
+                        transitionDuration: Duration(milliseconds: 500),
+                      ),
+                    );
+                    SmartDialog.dismiss();
+                  },
+                  child: Text('是'),
                 ),
                 ElevatedButton(
                   onPressed: () => SmartDialog.dismiss(),
