@@ -48,7 +48,7 @@ class _VistiScreenState extends State<VistiScreen> {
                             children: [
                               GestureDetector(
                                 onTap: () {
-                                  Get.offAll(HomeScreen());
+                                  Navigator.pop(context);
                                 },
                                 child: Container(
                                   height: 40,
