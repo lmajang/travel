@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+//import 'package:get/get.dart';
 import 'package:getwidget/getwidget.dart';
 import 'package:insta_assets_picker/insta_assets_picker.dart';
 import 'package:tdesign_flutter/tdesign_flutter.dart';
@@ -8,7 +9,7 @@ import 'package:travel/entity/index.dart';
 import 'package:travel/view/Upload_Screen.dart';
 
 import '../view/Home_Screen.dart';
-
+import 'package:dio/dio.dart';
 
 class PickerCropResultScreens extends StatefulWidget {
   PickerCropResultScreens({Key? key, required this.cropStream}) : super(key: key);
@@ -20,6 +21,8 @@ class PickerCropResultScreens extends StatefulWidget {
 }
 
 class _PickerCropResultScreenStates extends State<PickerCropResultScreens> {
+  List<dynamic> image_path =[];
+  final dio = Dio();
   final TextEditingController _contentController = TextEditingController();
   final List<TDSelectTag> _tags = [
     TDSelectTag("#快来和我一起玩吧", isSelected: true, disableSelect: false,),
@@ -49,8 +52,9 @@ class _PickerCropResultScreenStates extends State<PickerCropResultScreens> {
         ),
         actions: [
           GFButton(
-            onPressed: () {
+            onPressed: () async {
               Navigator.push(
+
                 context,
                 PageRouteBuilder(
                   pageBuilder: (context, animation, secondaryAnimation) {
@@ -84,6 +88,7 @@ class _PickerCropResultScreenStates extends State<PickerCropResultScreens> {
           heightAssets: height / 4,
           contentController: _contentController,
           tags: _tags,
+          image_path: image_path,
         ),
       ),
     );
@@ -101,6 +106,7 @@ class CropResultViews extends StatefulWidget {
     this.heightAssets = 120.0,
     required this.contentController,
     required this.tags,
+    required this.image_path,
   }) : super(key: key);
 
   final TextEditingController contentController;
@@ -110,7 +116,7 @@ class CropResultViews extends StatefulWidget {
   final double heightFiles;
   final double heightAssets;
   final List<TDSelectTag> tags;
-
+  final List<dynamic> image_path;
 
   @override
   _CropResultViewState createState() => _CropResultViewState();
@@ -162,7 +168,7 @@ class _CropResultViewState extends State<CropResultViews> {
           _buildMeaus(),
           SizedBox(
             height: 300,
-          ),
+            ),
         ],
       ),
     );
@@ -298,6 +304,7 @@ class _CropResultViewState extends State<CropResultViews> {
             scrollDirection: Axis.horizontal,
             itemCount: widget.croppedFiles.length,
             itemBuilder: (BuildContext _, int index) {
+              widget.image_path.add(widget.croppedFiles[index].path);
               return Padding(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 8.0,
