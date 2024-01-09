@@ -20,6 +20,7 @@ import 'package:http/http.dart' as http;
 import '../aMap_tool/DistanceCalculator.dart';
 import '../aMap_tool/getLocationPermission.dart';
 import '../aMap_tool/initMapOption.dart';
+import '../widgets/crop_result_view.dart';
 
 
 class mapScreen extends StatefulWidget {
@@ -62,7 +63,7 @@ class _mapScreenState extends State<mapScreen>{
 
     ///iOS 获取native精度类型
     if (Platform.isIOS) {
-      requestAccuracyAuthorization();
+      MapOption.requestAccuracyAuthorization(_locationPlugin);
     }
 
     ///设置是否已经取得用户同意，如果未取得用户同意，高德定位SDK将不会工作,这里传true
@@ -119,22 +120,6 @@ class _mapScreenState extends State<mapScreen>{
   }
 
 
-
-  ///开始定位
-  void _startLocation() {
-    if (null != _locationPlugin) {
-      ///开始定位之前设置定位参数
-      MapOption.setLocationOption(_locationPlugin,onceLocation: false);
-      _locationPlugin.startLocation();
-    }
-  }
-
-  ///停止定位
-  void _stopLocation() {
-    if (null != _locationPlugin) {
-      _locationPlugin.stopLocation();
-    }
-  }
 
   List<Marker> _markers = [];
 
@@ -334,20 +319,6 @@ class _mapScreenState extends State<mapScreen>{
     print('地图审图号（卫星地图): $satelliteImageApprovalNumber');
   }
 
-  ///获取iOS native的accuracyAuthorization类型
-  void requestAccuracyAuthorization() async {
-    AMapAccuracyAuthorization currentAccuracyAuthorization =
-    await _locationPlugin.getSystemAccuracyAuthorization();
-    if (currentAccuracyAuthorization ==
-        AMapAccuracyAuthorization.AMapAccuracyAuthorizationFullAccuracy) {
-      print("精确定位类型");
-    } else if (currentAccuracyAuthorization ==
-        AMapAccuracyAuthorization.AMapAccuracyAuthorizationReducedAccuracy) {
-      print("模糊定位类型");
-    } else {
-      print("未知定位类型");
-    }
-  }
 
   Future<List<LatLng>> _getAMapPointData(LatLng origin,LatLng destination) async {
     String url ='https://restapi.amap.com/v3/direction/walking?origin=${origin.longitude},${origin.latitude}&destination=${destination.longitude},${destination.latitude}&key=${mapConfig.lineKey}';
@@ -405,7 +376,7 @@ class _mapScreenState extends State<mapScreen>{
                 ElevatedButton(
                   onPressed: () {
                     getPositionPermission =true;
-                    _startLocation();
+                    MapOption.startLocation(_locationPlugin,onceLocation: false);
                     SmartDialog.dismiss();
                   },
                   child: Text('同意'),

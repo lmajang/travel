@@ -1,12 +1,17 @@
+import 'dart:async';
 import 'dart:io';
+import 'package:amap_flutter_location/amap_flutter_location.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:getwidget/getwidget.dart';
 import 'package:insta_assets_picker/insta_assets_picker.dart';
 import 'package:tdesign_flutter/tdesign_flutter.dart';
+import 'package:travel/aMap_tool/initMapOption.dart';
 import 'package:travel/entity/index.dart';
 import 'package:travel/view/Upload_Screen.dart';
+import 'package:travel/common/Config.dart';
 
+import '../aMap_tool/getLocationPermission.dart';
 import '../view/Home_Screen.dart';
 
 
@@ -72,7 +77,7 @@ class _PickerCropResultScreenStates extends State<PickerCropResultScreens> {
                   });
                 }
 
-                await dio.post('http://192.168.29.1:8080/upload', data: await createFormData());
+                await dio.post('${appConfig.ipconfig}upload', data: await createFormData());
               }
               _repeatedlyRequest();
               // Navigator.push(
@@ -148,6 +153,71 @@ class CropResultViews extends StatefulWidget {
 }
 
 class _CropResultViewState extends State<CropResultViews> {
+  String _latitude = ""; //纬度
+  String _longitude = ""; //经度
+  String province = ""; // 省份
+  String city = ""; // 市
+  String district = ""; // 区
+
+  // 实例化
+  final AMapFlutterLocation _locationPlugin = AMapFlutterLocation();
+  // 监听定位
+  late StreamSubscription<Map<String, Object>> _locationListener;
+
+  String userLocation ='你在哪里';
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+
+    /// 动态申请定位权限
+    LocationPermission.requestPermission();
+
+    ///iOS 获取native精度类型
+    if (Platform.isIOS) {
+      MapOption.requestAccuracyAuthorization(_locationPlugin);
+    }
+
+    ///设置是否已经取得用户同意，如果未取得用户同意，高德定位SDK将不会工作,这里传true
+    AMapFlutterLocation.updatePrivacyAgree(true);
+
+    /// 设置是否已经包含高德隐私政策并弹窗展示显示用户查看，如果未包含或者没有弹窗展示，高德定位SDK将不会工作,这里传true
+    AMapFlutterLocation.updatePrivacyShow(true, true);
+
+    ///注册定位结果监听
+    _locationListener = _locationPlugin
+        .onLocationChanged()
+        .listen((Map<String, Object> result) {
+      print(result);
+
+      setState(() {
+        _latitude = result["latitude"].toString();
+        _longitude = result["longitude"].toString();
+        province = result['province'].toString();
+        city = result['city'].toString();
+        district = result['district'].toString();
+
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    ///移除定位监听
+    if (null != _locationListener) {
+      _locationListener.cancel();
+    }
+    if (null != _locationListener) {
+      _locationListener.cancel();
+    }
+
+    ///销毁定位
+    if (null != _locationPlugin) {
+      _locationPlugin.destroy();
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -200,12 +270,7 @@ class _CropResultViewState extends State<CropResultViews> {
     );
   }
 
-  final List<MenuItemModel> _menus = [
-    MenuItemModel(icon:TDIcons.location,title: "你在哪里"),
-    MenuItemModel(icon:TDIcons.lock_off,title: "公开·所有人可见"),
-    MenuItemModel(icon:TDIcons.calendar,title: "是否创建回忆"),
-    MenuItemModel(icon:TDIcons.setting,title: "高级设置"),
-  ];
+
 
   Widget _buildContentInput(){
     return Padding(padding: const EdgeInsets.only(left: 15,top: 5,right: 15),
@@ -248,6 +313,30 @@ class _CropResultViewState extends State<CropResultViews> {
   }
 
   Widget _buildMeaus(){
+
+    final List<MenuItemModel> _menus = [
+      MenuItemModel(
+          icon:TDIcons.location,
+          title: userLocation,
+          onTap:() async {
+            MapOption.startLocation(_locationPlugin,onceLocation: true);
+            // 显示加载指示器
+            showLoadingIndicator();
+            // 等待一小段时间（如果有回调或事件可用，也可以使用它们）
+            await Future.delayed(Duration(seconds: 1));
+            // 隐藏加载指示器
+            hideLoadingIndicator();
+            setState(() {
+              // userLocation = _latitude +"--"+_longitude;
+              userLocation = province+city+district;
+            });
+          }
+      ),
+      MenuItemModel(icon:TDIcons.lock_off,title: "公开·所有人可见"),
+      MenuItemModel(icon:TDIcons.calendar,title: "是否创建回忆"),
+      MenuItemModel(icon:TDIcons.setting,title: "高级设置"),
+    ];
+
     List<Widget> ws = [];
     ws.add(const Divider());
     for(var menu in _menus) {
@@ -420,5 +509,31 @@ class _CropResultViewState extends State<CropResultViews> {
         },
       ),
     );
+  }
+
+  void showLoadingIndicator() {
+    // 在这里显示加载指示器，可以使用 showDialog 或其他加载指示器组件
+    // 示例：使用 Dialog
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(height: 10),
+              Text('Loading...'),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void hideLoadingIndicator() {
+    // 在这里隐藏加载指示器，可以使用 Navigator.pop 或其他适当的方法
+    // 示例：使用 Navigator.pop
+    Navigator.pop(context);
   }
   }
