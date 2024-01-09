@@ -6,6 +6,7 @@ import 'package:getwidget/types/gf_button_type.dart';
 import 'package:tdesign_flutter/tdesign_flutter.dart';
 
 import '../const.dart';
+import '../init_page/init_item.dart';
 import 'Visit_Screen.dart';
 
 class RecommedScreen extends StatefulWidget {
@@ -19,6 +20,7 @@ class _RecommedScreenState extends State<RecommedScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: initAppbar(),
       body: SafeArea(
         child: SingleChildScrollView(
           child: Column(

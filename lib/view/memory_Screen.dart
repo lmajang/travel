@@ -5,6 +5,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:getwidget/components/button/gf_button.dart';
 
+import '../init_page/init_item.dart';
+
 class MemoryScreen extends StatefulWidget {
   const MemoryScreen({super.key});
 
@@ -38,6 +40,8 @@ class _MemoryScreenState extends State<MemoryScreen> {
   Widget build(BuildContext context) {
     Size scrSize = MediaQuery.of(context).size;
     return Scaffold(
+      appBar: initAppbar(),
+      body: Text('回忆录'),
         body: Container(
           height: scrSize.height,
           width: scrSize.width,
