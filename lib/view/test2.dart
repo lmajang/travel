@@ -7,15 +7,15 @@ import 'package:wechat_assets_picker/wechat_assets_picker.dart';
 
 import '../const.dart';
 
-class CollapsingAppbarWithTabsPage extends StatefulWidget {
-  CollapsingAppbarWithTabsPage({Key? key}) : super(key: key);
+class CollapsingAppbarWithTabsPages extends StatefulWidget {
+  CollapsingAppbarWithTabsPages({Key? key}) : super(key: key);
 
   @override
-  _CollapsingAppbarWithTabsPageState createState() =>
-      _CollapsingAppbarWithTabsPageState();
+  _CollapsingAppbarWithTabsPagesState createState() =>
+      _CollapsingAppbarWithTabsPagesState();
 }
 
-class _CollapsingAppbarWithTabsPageState extends State<CollapsingAppbarWithTabsPage> {
+class _CollapsingAppbarWithTabsPagesState extends State<CollapsingAppbarWithTabsPages> {
 
   final List<String> path=[
     'p1.png','p5.png','p12.png','p13.png','p20.png','p21.png',
@@ -127,9 +127,9 @@ class _CollapsingAppbarWithTabsPageState extends State<CollapsingAppbarWithTabsP
   }
   @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
-      length: 3,
-      child: Scaffold(
+    return Scaffold(
+      body: DefaultTabController(
+        length: 3,
         // appBar: GFAppBar(
         //   //primary: true,
         //   // leading:GFIconButton(
@@ -180,7 +180,7 @@ class _CollapsingAppbarWithTabsPageState extends State<CollapsingAppbarWithTabsP
         //   bottomOpacity: 0,
         //   elevation: 0,
         // ),
-        body: NestedScrollView(
+        child: NestedScrollView(
           headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
             return <Widget>[
               SliverAppBar(
@@ -336,17 +336,17 @@ class _CollapsingAppbarWithTabsPageState extends State<CollapsingAppbarWithTabsP
               ),
             ];
           },
-          body: TabBarView(
-            // children: _tabs
-            //     .map((e) => Center(
-            //   child: Text("${e.text}", textAlign: TextAlign.center),
-            // ))
-            //.toList()
-            children: [
-              _buildProfileView(),
-              _buildProfileView(),
-              _buildProfileView(),
-            ],
+          body:TabBarView(
+                // children: _tabs
+                //     .map((e) => Center(
+                //   child: Text("${e.text}", textAlign: TextAlign.center),
+                // ))
+                //.toList()
+                children: [
+                    _buildProfileView(),
+                    _buildProfileView(),
+                    _buildProfileView(),
+                ],
           ),
         ),
       ),

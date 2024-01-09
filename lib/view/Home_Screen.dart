@@ -77,22 +77,88 @@ class _HomeScreenState extends State<HomeScreen> {
         },
         letIndexChange: (index){
           if(index == 2) {
-            Navigator.push(
+            // Navigator.push(
+            //   context,
+            //   PageRouteBuilder(
+            //     pageBuilder: (context, animation, secondaryAnimation) {
+            //       return WeChatCameraPicker();
+            //     },
+            //     transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            //       const begin = Offset(-1.0, 0.0);
+            //       const end = Offset.zero;
+            //       const curve = Curves.easeInOut;
+            //       var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+            //       var offsetAnimation = animation.drive(tween);
+            //       return SlideTransition(position: offsetAnimation, child: child);
+            //     },
+            //     transitionDuration: Duration(milliseconds: 500),
+            //   ),
+            // );
+            InstaAssetPicker.pickAssets(
               context,
-              PageRouteBuilder(
-                pageBuilder: (context, animation, secondaryAnimation) {
-                  return WeChatCameraPicker();
-                },
-                transitionsBuilder: (context, animation, secondaryAnimation, child) {
-                  const begin = Offset(-1.0, 0.0);
-                  const end = Offset.zero;
-                  const curve = Curves.easeInOut;
-                  var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
-                  var offsetAnimation = animation.drive(tween);
-                  return SlideTransition(position: offsetAnimation, child: child);
-                },
-                transitionDuration: Duration(milliseconds: 500),
-              ),
+              //title: description.fullLabel,
+              maxAssets: 10,
+              pickerTheme: getPickerTheme(context),
+              actionsBuilder: (
+                  BuildContext context,
+                  ThemeData? pickerTheme,
+                  double height,
+                  VoidCallback unselectAll,
+                  ) =>
+              [
+                InstaPickerCircleIconButton.unselectAll(
+                  onTap: unselectAll,
+                  theme: pickerTheme,
+                  size: height,
+                ),
+                const SizedBox(width: 8),
+                InstaPickerCircleIconButton(
+                  onTap: () => _pickFromWeChatCamera(context),
+                  theme: pickerTheme,
+                  icon: const Icon(Icons.camera_alt),
+                  size: height,
+                ),
+              ],
+              specialItemBuilder: (context, _, __) {
+                // return a button that open the camera
+                return ElevatedButton(
+                  onPressed: () async {
+                    Feedback.forTap(context);
+                    final AssetEntity? entity =
+                    await _pickFromWeChatCamera(context);
+                    if (entity == null) return;
+                    if (context.mounted) {
+                      await InstaAssetPicker.refreshAndSelectEntity(
+                        context,
+                        entity,
+                      );
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    foregroundColor: Colors.white,
+                    backgroundColor: Colors.transparent,
+                  ),
+                  child: FittedBox(
+                    fit: BoxFit.cover,
+                    child: Text(
+                      InstaAssetPicker.defaultTextDelegate(context)
+                          .sActionUseCameraHint,
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                );
+              },
+              // since the list is revert, use prepend to be at the top
+              specialItemPosition: SpecialItemPosition.prepend,
+              onCompleted: (cropStream) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) =>
+                        PickerCropResultScreens(cropStream: cropStream),
+                  ),
+                );
+              },
             );
             return false;
           }

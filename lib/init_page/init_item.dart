@@ -8,6 +8,7 @@ import 'package:travel/view/memory_Screen.dart';
 import 'package:travel/view/recommed_Screen.dart';
 
 import '../view/test.dart';
+import '../view/test2.dart';
 
 List<Widget> bottomBarItem = [
   Icon(TDIcons.home,
@@ -35,6 +36,9 @@ List<Widget> pages =[
   RecommedScreen(),
   ClassifyScreen(),
   RecommedScreen(),
-  MemoryScreen(),
-  UserScreen(),
+  //MemoryScreen(),
+  //StoryExamplePage(),
+  CollapsingAppbarWithTabsPages(),
+  CollapsingAppbarWithTabsPage(),
+  //UserScreen(),
 ];

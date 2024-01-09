@@ -3,6 +3,8 @@ import 'package:insta_assets_picker/insta_assets_picker.dart';
 import 'package:travel/main.dart';
 import 'package:travel/widgets/crop_result_view.dart';
 
+import '../view/Upload_Screen.dart';
+
 class PickerDescription {
   final String icon;
   final String label;
@@ -88,7 +90,7 @@ mixin InstaPickerInterface on Widget {
             context,
             MaterialPageRoute(
               builder: (context) =>
-                  PickerCropResultScreen(cropStream: cropStream),
+                  PickerCropResultScreens(cropStream: cropStream),
             ),
           );
         },

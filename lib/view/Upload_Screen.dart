@@ -1,5 +1,5 @@
 import 'dart:io';
-
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:getwidget/getwidget.dart';
 import 'package:insta_assets_picker/insta_assets_picker.dart';
@@ -21,6 +21,8 @@ class PickerCropResultScreens extends StatefulWidget {
 
 class _PickerCropResultScreenStates extends State<PickerCropResultScreens> {
   final TextEditingController _contentController = TextEditingController();
+  final TextEditingController _contentController1 = TextEditingController();
+  final List<dynamic> image_path=[];
   final List<TDSelectTag> _tags = [
     TDSelectTag("#快来和我一起玩吧", isSelected: true, disableSelect: false,),
     TDSelectTag("#快来和我一起玩吧", isSelected: false, disableSelect: false,),
@@ -28,9 +30,17 @@ class _PickerCropResultScreenStates extends State<PickerCropResultScreens> {
     TDSelectTag("#快来和我一起玩吧", isSelected: false, disableSelect: false,),
     TDSelectTag("#快来和我一起玩吧", isSelected: false, disableSelect: false,),
   ];
+  final List<String> _text=[
+    "#快来和我一起玩吧",
+    "#快来和我一起玩吧",
+    "#快来和我一起玩吧",
+    "#快来和我一起玩吧",
+    "#快来和我一起玩吧",
+  ];
 
   void dispose(){
     _contentController.dispose();
+    _contentController1.dispose();
     super.dispose();
   }
 
@@ -50,23 +60,38 @@ class _PickerCropResultScreenStates extends State<PickerCropResultScreens> {
         actions: [
           GFButton(
             onPressed: () {
-              Navigator.push(
-                context,
-                PageRouteBuilder(
-                  pageBuilder: (context, animation, secondaryAnimation) {
-                    return HomeScreen();
-                  },
-                  transitionsBuilder: (context, animation, secondaryAnimation, child) {
-                    const begin = Offset(1.0, 0.0);
-                    const end = Offset.zero;
-                    const curve = Curves.easeInOut;
-                    var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
-                    var offsetAnimation = animation.drive(tween);
-                    return SlideTransition(position: offsetAnimation, child: child);
-                  },
-                  transitionDuration: Duration(milliseconds: 500),
-                ),
-              );
+              final dio = Dio();
+              print(DateTime.now().toIso8601String());
+              Future<void> _repeatedlyRequest() async {
+                Future<FormData> createFormData() async {
+                  return FormData.fromMap({
+                    'label': _text,
+                    'date': DateTime.now().toIso8601String(),
+                    'description': _contentController.text,
+                    'file': await MultipartFile.fromFile(image_path[0]),
+                  });
+                }
+
+                await dio.post('http://192.168.29.1:8080/upload', data: await createFormData());
+              }
+              _repeatedlyRequest();
+              // Navigator.push(
+              //   context,
+              //   PageRouteBuilder(
+              //     pageBuilder: (context, animation, secondaryAnimation) {
+              //       return HomeScreen();
+              //     },
+              //     transitionsBuilder: (context, animation, secondaryAnimation, child) {
+              //       const begin = Offset(1.0, 0.0);
+              //       const end = Offset.zero;
+              //       const curve = Curves.easeInOut;
+              //       var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+              //       var offsetAnimation = animation.drive(tween);
+              //       return SlideTransition(position: offsetAnimation, child: child);
+              //     },
+              //     transitionDuration: Duration(milliseconds: 500),
+              //   ),
+              // );
             },
             text: '发布',
             color: Colors.transparent,
@@ -83,6 +108,8 @@ class _PickerCropResultScreenStates extends State<PickerCropResultScreens> {
           heightFiles: height / 2,
           heightAssets: height / 4,
           contentController: _contentController,
+          titleController: _contentController1,
+          image_path: image_path,
           tags: _tags,
         ),
       ),
@@ -92,6 +119,7 @@ class _PickerCropResultScreenStates extends State<PickerCropResultScreens> {
 
 
 class CropResultViews extends StatefulWidget {
+
   CropResultViews({
     Key? key,
     required this.selectedAssets,
@@ -100,9 +128,12 @@ class CropResultViews extends StatefulWidget {
     this.heightFiles = 300.0,
     this.heightAssets = 120.0,
     required this.contentController,
+    required this.titleController,
     required this.tags,
+    required this.image_path,
   }) : super(key: key);
 
+  final TextEditingController titleController;
   final TextEditingController contentController;
   final List<AssetEntity> selectedAssets;
   final List<File> croppedFiles;
@@ -110,7 +141,7 @@ class CropResultViews extends StatefulWidget {
   final double heightFiles;
   final double heightAssets;
   final List<TDSelectTag> tags;
-
+  final List<dynamic> image_path;
 
   @override
   _CropResultViewState createState() => _CropResultViewState();
@@ -124,13 +155,14 @@ class _CropResultViewState extends State<CropResultViews> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
+          _buildTitleInpute(),
           _buildContentInput(),
-          Padding(
+          const Padding(
             padding: EdgeInsets.only(left: 15),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                TDTag("#话题", size: TDTagSize.large),
+                TDTag("#话题", size: TDTagSize.large,),
                 SizedBox(width: 10),
                 TDTag("@朋友", size: TDTagSize.large),
               ],
@@ -195,6 +227,23 @@ class _CropResultViewState extends State<CropResultViews> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildTitleInpute(){
+    return TDInput(
+      leftLabel: '标题',
+      required: true,
+      controller: widget.titleController,
+      backgroundColor: Colors.transparent,
+      hintText: '请输入文字',
+      onChanged: (text) {
+        setState(() {});
+      },
+      onClearTap: () {
+        widget.titleController.clear();
+        setState(() {});
+      },
     );
   }
 
@@ -298,6 +347,9 @@ class _CropResultViewState extends State<CropResultViews> {
             scrollDirection: Axis.horizontal,
             itemCount: widget.croppedFiles.length,
             itemBuilder: (BuildContext _, int index) {
+              widget.image_path.add(widget.croppedFiles[index].path);
+              final String path = widget.croppedFiles[index].path;
+              print(path);
               return Padding(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 8.0,

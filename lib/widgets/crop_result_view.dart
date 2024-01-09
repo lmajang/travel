@@ -1,370 +1,194 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
-import 'package:getwidget/getwidget.dart';
 import 'package:insta_assets_picker/insta_assets_picker.dart';
-import 'package:tdesign_flutter/tdesign_flutter.dart';
-import 'package:travel/entity/index.dart';
-import 'package:travel/view/Upload_Screen.dart';
+import 'package:travel/widgets/crop_result_view.dart';
+import 'package:travel/view/Home_Screen.dart';
+import 'package:travel/widgets/insta_picker_interface.dart';
+import 'package:wechat_camera_picker/wechat_camera_picker.dart';
 
-import '../view/Home_Screen.dart';
+import '../view/Upload_Screen.dart';
 
-
-class PickerCropResultScreen extends StatefulWidget {
-  PickerCropResultScreen({Key? key, required this.cropStream}) : super(key: key);
-
-  final Stream<InstaAssetsExportDetails> cropStream;
+class WeChatCameraPicker extends StatelessWidget with InstaPickerInterface {
+  const WeChatCameraPicker({super.key});
 
   @override
-  _PickerCropResultScreenState createState() => _PickerCropResultScreenState();
-}
+  PickerDescription get description => const PickerDescription(
+    icon: '📸',
+    label: 'WeChat Camera Picker',
+    description: 'Picker with a camera button.\n'
+        'The camera logic is handled by the `wechat_camera_picker` package.',
+  );
 
-class _PickerCropResultScreenState extends State<PickerCropResultScreen> {
-  final TextEditingController _contentController = TextEditingController();
-  final List<TDSelectTag> _tags = [
-    TDSelectTag("#快来和我一起玩吧"),
-    TDSelectTag("#快来和我一起玩吧"),
-    TDSelectTag("#快来和我一起玩吧"),
-    TDSelectTag("#快来和我一起玩吧"),
-    TDSelectTag("#快来和我一起玩吧"),
-  ];
-
-  void dispose(){
-    _contentController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final height = MediaQuery.of(context).size.height - kToolbarHeight;
-    return Scaffold(
-      appBar: AppBar(
-        centerTitle: true,
-        title: const Text(
-          '新帖子',
-          style: TextStyle(
-            color: Colors.black,
-            fontSize: 17,
-          ),
-        ),
-        actions: [
-          GFButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                PageRouteBuilder(
-                  pageBuilder: (context, animation, secondaryAnimation) {
-                    return HomeScreen();
-                  },
-                  transitionsBuilder: (context, animation, secondaryAnimation, child) {
-                    const begin = Offset(1.0, 0.0);
-                    const end = Offset.zero;
-                    const curve = Curves.easeInOut;
-                    var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
-                    var offsetAnimation = animation.drive(tween);
-                    return SlideTransition(position: offsetAnimation, child: child);
-                  },
-                  transitionDuration: Duration(milliseconds: 500),
-                ),
-              );
-            },
-            text: '发布',
-            color: Colors.transparent,
-            shape: GFButtonShape.pills,
-          ),
-        ],
-      ),
-      body: StreamBuilder<InstaAssetsExportDetails>(
-        stream: widget.cropStream,
-        builder: (context, snapshot) => CropResultView(
-          selectedAssets: snapshot.data?.selectedAssets ?? [],
-          croppedFiles: snapshot.data?.croppedFiles ?? [],
-          progress: snapshot.data?.progress,
-          heightFiles: height / 2,
-          heightAssets: height / 4,
-          contentController: _contentController,
-          tags: _tags,
-        ),
-      ),
-    );
-  }
-}
-
-
-class CropResultView extends StatelessWidget {
-  CropResultView({
-    Key? key,
-    required this.selectedAssets,
-    required this.croppedFiles,
-    this.progress,
-    this.heightFiles = 300.0,
-    this.heightAssets = 120.0,
-    required this.contentController,
-    required this.tags,
-  }) : super(key: key);
-
-  final TextEditingController contentController;
-  final List<AssetEntity> selectedAssets;
-  final List<File> croppedFiles;
-  final double? progress;
-  final double heightFiles;
-  final double heightAssets;
-  final List<TDSelectTag> tags;
-
-  final List<MenuItemModel> _menus = [
-    MenuItemModel(icon:TDIcons.location,title: "你在哪里"),
-    MenuItemModel(icon:TDIcons.lock_off,title: "公开·所有人可见"),
-    MenuItemModel(icon:TDIcons.calendar,title: "是否创建回忆"),
-    MenuItemModel(icon:TDIcons.setting,title: "高级设置"),
-  ];
-
-  Widget _buildContentInput(){
-    return Padding(padding: const EdgeInsets.only(left: 15,top: 5,right: 15),
-      child:LimitedBox(
-        maxHeight: 100,
-        child: TextField(
-          maxLines: 50,
-          maxLength: 300,
-          controller:  contentController,
-          decoration: const InputDecoration(
-            hintText: "添加作品的描述...",
-            hintStyle: TextStyle(
-              color: Colors.grey,
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
-            ),
-            border: InputBorder.none,
-            //counterText: _contentController.text.isEmpty ? "" :null,
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildMeaus(){
-    List<Widget> ws = [];
-    ws.add(const Divider());
-    for(var menu in _menus) {
-      ws.add(ListTile(
-        leading: Icon(menu.icon),
-        title: Text(menu.title!),
-        trailing: Icon(menu.right ?? TDIcons.chevron_right),
-        onTap: menu.onTap,
-      ));
-      ws.add(const Divider());
-    }
-    return Padding(padding: EdgeInsets.only(left: 15,right: 15,top: 10),
-      child: Column(
-        children: ws,
-      ),
-    );
-  }
-
-  Widget _buildTagSelector(){
-    //ws.add(const Divider());
-    return Container(
-      height: 60,
-      child: Padding(padding: EdgeInsets.only(top: 0,left: 0),
-        child: ListView.builder(
-          physics: const BouncingScrollPhysics(),
-          shrinkWrap: true,
-          padding: const EdgeInsets.symmetric(horizontal: 8.0),
-          scrollDirection: Axis.horizontal,
-          itemCount: tags.length,
-          itemBuilder: (BuildContext , int index) {
-            TDSelectTag tag = tags.elementAt(index);
-            return Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 8.0,
-                  vertical: 16.0,
-                ),
-                // TODO : add delete action
-                child: Column(
-                  children: [
-                    TDSelectTag(
-                      tag.text,
-                      size: TDTagSize.large,
-                      isLight: true,
-                      //isSelected: _isSelected,
-                      disableSelect:false,
-                      onSelectChanged: (isSelected){
-                        //setState((){
-                          //_isSelected =true;
-                        //});
-                      },
-                    ),
-                  ],
-                )
-            );
-          },
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTitle(String title, int length) {
-    return SizedBox(
-      height: 20.0,
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          Text(title),
-          Container(
-            margin: const EdgeInsets.symmetric(horizontal: 10.0),
-            padding: const EdgeInsets.all(4.0),
-            decoration: const BoxDecoration(
-              shape: BoxShape.circle,
-              color: Colors.deepPurpleAccent,
-              //color: Colors.red
-            ),
-            child: Text(
-              length.toString(),
-              style: const TextStyle(
-                color: Colors.white,
-                height: 1.0,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCroppedImagesListView(BuildContext context) {
-    if (progress == null) {
-      return const SizedBox.shrink();
-    }
-
-    return Expanded(
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          ListView.builder(
-            physics: const BouncingScrollPhysics(),
-            padding: const EdgeInsets.symmetric(horizontal: 8.0),
-            scrollDirection: Axis.horizontal,
-            itemCount: croppedFiles.length,
-            itemBuilder: (BuildContext _, int index) {
-              return Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 8.0,
-                  vertical: 16.0,
-                ),
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(4.0),
-                  ),
-                  child: Image.file(croppedFiles[index]),
-                ),
-              );
-            },
-          ),
-          if (progress! < 1.0)
-            Positioned.fill(
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  color:
-                  Theme.of(context).scaffoldBackgroundColor.withOpacity(.5),
-                ),
-              ),
-            ),
-          if (progress! < 1.0)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              child: ClipRRect(
-                borderRadius: const BorderRadius.all(Radius.circular(5)),
-                child: SizedBox(
-                  height: 6,
-                  child: LinearProgressIndicator(
-                    value: progress,
-                    semanticsLabel: '${progress! * 100}%',
-                  ),
-                ),
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSelectedAssetsListView() {
-    if (selectedAssets.isEmpty) return const SizedBox.shrink();
-
-    return Expanded(
-      child: ListView.builder(
-        physics: const BouncingScrollPhysics(),
-        padding: const EdgeInsets.symmetric(horizontal: 8.0),
-        scrollDirection: Axis.horizontal,
-        itemCount: selectedAssets.length,
-        itemBuilder: (BuildContext _, int index) {
-          final AssetEntity asset = selectedAssets.elementAt(index);
-
-          return Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 8.0,
-              vertical: 16.0,
-            ),
-            // TODO : add delete action
-            child: RepaintBoundary(
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(8.0),
-                child: Image(image: AssetEntityImageProvider(asset)),
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return
-      SingleChildScrollView(
-          child:
-          Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              _buildContentInput(),
-              Padding(padding: EdgeInsets.only(left: 15),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    TDTag("#话题",size: TDTagSize.large,),
-                    SizedBox(width: 10,),
-                    TDTag("@朋友",size: TDTagSize.large,)
-                  ],
-                ),
-              ),
-              _buildTagSelector(),
-              AnimatedContainer(
-                duration: kThemeChangeDuration,
-                curve: Curves.easeInOut,
-                height: croppedFiles.isNotEmpty ? heightFiles : 40.0,
-                child: Column(
-                  children: <Widget>[
-                    _buildTitle('Cropped Images', croppedFiles.length),
-                    _buildCroppedImagesListView(context),
-                  ],
-                ),
-              ),
-              AnimatedContainer(
-                duration: kThemeChangeDuration,
-                curve: Curves.easeInOut,
-                height: selectedAssets.isNotEmpty ? heightAssets : 40.0,
-                child: Column(
-                  children: <Widget>[
-                    _buildTitle('Selected Assets', selectedAssets.length),
-                    _buildSelectedAssetsListView(),
-                  ],
-                ),
-              ),
-              _buildMeaus(),
-              SizedBox(
-                height: 300,
-              )
-            ],
-          )
+  /// Needs a [BuildContext] that is coming from the picker
+  Future<AssetEntity?> _pickFromWeChatCamera(BuildContext context) =>
+      CameraPicker.pickFromCamera(
+        context,
+        locale: Localizations.maybeLocaleOf(context),
+        pickerConfig: CameraPickerConfig(theme: Theme.of(context)),
       );
+
+  // Future<AssetEntity?> _pickFromWeChatCamera(BuildContext context) async {
+  //   final pickedImage = await CameraPicker.pickFromCamera(
+  //     context,
+  //     locale: Localizations.maybeLocaleOf(context),
+  //     pickerConfig: CameraPickerConfig(theme: Theme.of(context)),
+  //   );
+  //
+  //   // 处理返回逻辑
+  //   if (pickedImage != null) {
+  //     // 处理选取的图片逻辑
+  //
+  //     // 返回到 HomeScreen 页面
+  //     Navigator.pushReplacement(
+  //       context,
+  //       MaterialPageRoute(
+  //         builder: (context) => Home_Screen(),  // 替换为你的 HomeScreen 类
+  //       ),
+  //     );
+  //   }
+  //
+  //   return null;
+  // }
+
+  @override
+  Widget build(BuildContext context) {
+    // 直接调用 InstaAssetPicker.pickAssets 方法
+    InstaAssetPicker.pickAssets(
+      context,
+      maxAssets: 10,
+      pickerTheme: getPickerTheme(context),
+      actionsBuilder: (
+          BuildContext context,
+          ThemeData? pickerTheme,
+          double height,
+          VoidCallback unselectAll,
+          ) =>
+      [
+        InstaPickerCircleIconButton.unselectAll(
+          onTap: unselectAll,
+          theme: pickerTheme,
+          size: height,
+        ),
+        const SizedBox(width: 8),
+        InstaPickerCircleIconButton(
+          onTap: () => _pickFromWeChatCamera(context),
+          theme: pickerTheme,
+          icon: const Icon(Icons.camera_alt),
+          size: height,
+        ),
+      ],
+      specialItemBuilder: (context, _, __) {
+        // return a button that open the camera
+        return ElevatedButton(
+          onPressed: () async {
+            Feedback.forTap(context);
+            final AssetEntity? entity =
+            await _pickFromWeChatCamera(context);
+            if (entity == null) return;
+
+            if (context.mounted) {
+              await InstaAssetPicker.refreshAndSelectEntity(
+                context,
+                entity,
+              );
+            }
+          },
+          style: ElevatedButton.styleFrom(
+            foregroundColor: Colors.white,
+            backgroundColor: Colors.transparent,
+          ),
+          child: FittedBox(
+            fit: BoxFit.cover,
+            child: Text(
+              InstaAssetPicker.defaultTextDelegate(context)
+                  .sActionUseCameraHint,
+              textAlign: TextAlign.center,
+            ),
+          ),
+        );
+      },
+      specialItemPosition: SpecialItemPosition.prepend,
+      onCompleted: (cropStream) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) =>
+                PickerCropResultScreens(cropStream: cropStream),
+          ),
+        );
+      },
+    );
+
+    // 返回一个空的 Container，因为这个页面不需要额外的 UI 展示
+    return Container();
   }
+// Widget build(BuildContext context) => buildLayout(
+//   context,
+//   onPressed: () => InstaAssetPicker.pickAssets(
+//         context,
+//         title: description.fullLabel,
+//         maxAssets: 10,
+//         pickerTheme: getPickerTheme(context),
+//         actionsBuilder: (
+//              BuildContext context,
+//              ThemeData? pickerTheme,
+//              double height,
+//              VoidCallback unselectAll,
+//              ) =>
+//         [
+//           InstaPickerCircleIconButton.unselectAll(
+//             onTap: unselectAll,
+//             theme: pickerTheme,
+//             size: height,
+//           ),
+//           const SizedBox(width: 8),
+//           InstaPickerCircleIconButton(
+//             onTap: () => _pickFromWeChatCamera(context),
+//             theme: pickerTheme,
+//             icon: const Icon(Icons.camera_alt),
+//             size: height,
+//           ),
+//         ],
+//     specialItemBuilder: (context, _, __) {
+//       // return a button that open the camera
+//       return ElevatedButton(
+//         onPressed: () async {
+//           Feedback.forTap(context);
+//           final AssetEntity? entity =
+//           await _pickFromWeChatCamera(context);
+//           if (entity == null) return;
+//
+//           if (context.mounted) {
+//             await InstaAssetPicker.refreshAndSelectEntity(
+//               context,
+//               entity,
+//             );
+//           }
+//         },
+//         style: ElevatedButton.styleFrom(
+//           foregroundColor: Colors.white,
+//           backgroundColor: Colors.transparent,
+//         ),
+//         child: FittedBox(
+//           fit: BoxFit.cover,
+//           child: Text(
+//             InstaAssetPicker.defaultTextDelegate(context)
+//                 .sActionUseCameraHint,
+//             textAlign: TextAlign.center,
+//           ),
+//         ),
+//       );
+//     },
+//     // since the list is revert, use prepend to be at the top
+//     specialItemPosition: SpecialItemPosition.prepend,
+//     onCompleted: (cropStream) {
+//       Navigator.push(
+//         context,
+//         MaterialPageRoute(
+//           builder: (context) =>
+//               PickerCropResultScreen(cropStream: cropStream),
+//         ),
+//       );
+//    },
+//  ),
+// );
 }

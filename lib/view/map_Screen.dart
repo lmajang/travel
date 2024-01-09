@@ -13,8 +13,12 @@ import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:travel/common/Config.dart';
+import 'package:travel/view/test.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 import 'package:http/http.dart' as http;
+
+import '../aMap_tool/DistanceCalculator.dart';
+import '../widgets/crop_result_view.dart';
 
 
 class mapScreen extends StatefulWidget {

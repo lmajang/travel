@@ -72,6 +72,9 @@ dependencies:
   wechat_camera_picker: ^4.1.1
   photo_manager: ^3.0.0-dev.2
   flutter_instagram_storyboard: ^0.0.8
+  dio: ^5.4.0
+  icons_plus: ^5.0.0
+
 
 dev_dependencies:
   flutter_test:
@@ -101,6 +104,7 @@ flutter:
     - assets/city/
     - assets/district/
     - assets/areaList/
+    - assets/profileImages/
   fonts:
     - family: Finesse
       fonts:
