@@ -5,6 +5,7 @@ import 'package:getwidget/components/appbar/gf_appbar.dart';
 import 'package:getwidget/components/button/gf_icon_button.dart';
 import 'package:getwidget/types/gf_button_type.dart';
 import 'package:tdesign_flutter/tdesign_flutter.dart';
+import 'package:travel/init_page/refresh_component.dart';
 import 'package:travel/view/Classify_Screen.dart';
 import 'package:travel/view/User_Screen.dart';
 import 'package:travel/view/memory_Screen.dart';
@@ -41,7 +42,7 @@ List<Widget> pages =[
   RecommedScreen(),
   //MemoryScreen(),
   //StoryExamplePage(),
-  CollapsingAppbarWithTabsPages(),
+  BuildRefreshComponent(),
   CollapsingAppbarWithTabsPage(),
   //UserScreen(),
 ];

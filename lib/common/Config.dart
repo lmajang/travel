@@ -21,6 +21,6 @@ class mapConfig {
 
 class appConfig{
   /// ip地址
-  static const ipconfig = 'http://192.168.29.1:8080/';
+  static const ipconfig = 'http://172.27.48.1:8080/';
 
 }

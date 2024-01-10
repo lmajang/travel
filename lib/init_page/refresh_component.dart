@@ -1,26 +1,19 @@
-import 'package:easy_refresh/easy_refresh.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:easy_refresh/easy_refresh.dart';
 import 'package:flutter/material.dart';
-import 'package:getwidget/components/avatar/gf_avatar.dart';
-import 'package:getwidget/components/button/gf_icon_button.dart';
-import 'package:getwidget/types/gf_button_type.dart';
-import 'package:tdesign_flutter/tdesign_flutter.dart';
+import 'package:travel/init_page/CardStyle.dart';
 
 import '../const.dart';
-import '../init_page/CardStyle.dart';
-import '../init_page/init_item.dart';
-import 'Visit_Screen.dart';
+import 'init_item.dart';
 
-class RecommedScreen extends StatefulWidget {
-  const RecommedScreen({super.key});
+class BuildRefreshComponent extends StatefulWidget {
+  const BuildRefreshComponent({super.key});
 
   @override
-  State<RecommedScreen> createState() => _RecommedScreenState();
+  State<BuildRefreshComponent> createState() => _BuildRefreshComponentState();
 }
 
-class _RecommedScreenState extends State<RecommedScreen> {
-
-
+class _BuildRefreshComponentState extends State<BuildRefreshComponent> {
   int _count = 2;
   late EasyRefreshController _controller;
 
@@ -39,7 +32,6 @@ class _RecommedScreenState extends State<RecommedScreen> {
     super.dispose();
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -49,7 +41,7 @@ class _RecommedScreenState extends State<RecommedScreen> {
         header: const ClassicHeader(),
         footer: const ClassicFooter(),
         onRefresh: () async {
-          await Future.delayed(const Duration(seconds: 2));
+          await Future.delayed(const Duration(seconds: 4));
           if (!mounted) {
             return;
           }
@@ -60,7 +52,7 @@ class _RecommedScreenState extends State<RecommedScreen> {
           _controller.resetFooter();
         },
         onLoad: () async {
-          await Future.delayed(const Duration(seconds: 2));
+          await Future.delayed(const Duration(seconds: 4));
           setState(() {
             _count += 1;
           });

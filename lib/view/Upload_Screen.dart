@@ -26,7 +26,13 @@ class PickerCropResultScreens extends StatefulWidget {
 
 class _PickerCropResultScreenStates extends State<PickerCropResultScreens> {
   final TextEditingController _contentController = TextEditingController();
-  final TextEditingController _contentController1 = TextEditingController();
+  final TextEditingController _titleController = TextEditingController();
+
+  // 实例化
+  final AMapFlutterLocation _locationPlugin = AMapFlutterLocation();
+  // 监听定位
+  late StreamSubscription<Map<String, Object>> _locationListener;
+
   final List<dynamic> image_path=[];
   final List<TDSelectTag> _tags = [
     TDSelectTag("#快来和我一起玩吧", isSelected: true, disableSelect: false,),
@@ -43,9 +49,70 @@ class _PickerCropResultScreenStates extends State<PickerCropResultScreens> {
     "#快来和我一起玩吧",
   ];
 
+  String latitude = ""; //纬度
+  String longitude = ""; //经度
+  String province = ""; // 省份
+  String city = ""; // 市
+  String district = ""; // 区
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+
+    /// 动态申请定位权限
+    LocationPermission.requestPermission();
+
+    ///iOS 获取native精度类型
+    if (Platform.isIOS) {
+      MapOption.requestAccuracyAuthorization(_locationPlugin);
+    }
+
+    ///设置是否已经取得用户同意，如果未取得用户同意，高德定位SDK将不会工作,这里传true
+    AMapFlutterLocation.updatePrivacyAgree(true);
+
+    /// 设置是否已经包含高德隐私政策并弹窗展示显示用户查看，如果未包含或者没有弹窗展示，高德定位SDK将不会工作,这里传true
+    AMapFlutterLocation.updatePrivacyShow(true, true);
+
+    ///注册定位结果监听
+    _locationListener = _locationPlugin
+        .onLocationChanged()
+        .listen((Map<String, Object> result) {
+      print(result);
+
+      setState(() {
+        latitude = result["latitude"].toString();
+        longitude = result["longitude"].toString();
+        province = result['province'].toString();
+        city = result['city'].toString();
+        district = result['district'].toString();
+
+      });
+    });
+  }
+
+  // @override
+  // void dispose() {
+  //   super.dispose();
+  //
+  // }
+
+
   void dispose(){
+    ///移除定位监听
+    if (null != _locationListener) {
+      _locationListener.cancel();
+    }
+    if (null != _locationListener) {
+      _locationListener.cancel();
+    }
+
+    ///销毁定位
+    if (null != _locationPlugin) {
+      _locationPlugin.destroy();
+    }
     _contentController.dispose();
-    _contentController1.dispose();
+    _titleController.dispose();
     super.dispose();
   }
 
@@ -70,9 +137,14 @@ class _PickerCropResultScreenStates extends State<PickerCropResultScreens> {
               Future<void> _repeatedlyRequest() async {
                 Future<FormData> createFormData() async {
                   return FormData.fromMap({
+                    "sceneryname": _titleController.text,
                     'label': _text,
                     'date': DateTime.now().toIso8601String(),
                     'description': _contentController.text,
+                    'latitude': latitude,
+                    'longitude':longitude,
+                    "isrecall":'no',
+                    "userid":'1',
                     'file': await MultipartFile.fromFile(image_path[0]),
                   });
                 }
@@ -113,9 +185,15 @@ class _PickerCropResultScreenStates extends State<PickerCropResultScreens> {
           heightFiles: height / 2,
           heightAssets: height / 4,
           contentController: _contentController,
-          titleController: _contentController1,
+          titleController: _titleController,
           image_path: image_path,
           tags: _tags,
+          latitude:latitude,
+          longitude:longitude,
+          province:province,
+          city:city,
+          district:district,
+          locationPlugin: _locationPlugin,
         ),
       ),
     );
@@ -136,6 +214,12 @@ class CropResultViews extends StatefulWidget {
     required this.titleController,
     required this.tags,
     required this.image_path,
+    required this.latitude,
+    required this.longitude,
+    required this.province,
+    required this.city,
+    required this.district,
+    required this.locationPlugin,
   }) : super(key: key);
 
   final TextEditingController titleController;
@@ -147,76 +231,20 @@ class CropResultViews extends StatefulWidget {
   final double heightAssets;
   final List<TDSelectTag> tags;
   final List<dynamic> image_path;
-
+  final String latitude ;//纬度
+  final String longitude ; //经度
+  final String province ; // 省份
+  final String city ; // 市
+  final String district ; // 区
+  final AMapFlutterLocation locationPlugin;
   @override
   _CropResultViewState createState() => _CropResultViewState();
 }
 
 class _CropResultViewState extends State<CropResultViews> {
-  String _latitude = ""; //纬度
-  String _longitude = ""; //经度
-  String province = ""; // 省份
-  String city = ""; // 市
-  String district = ""; // 区
 
-  // 实例化
-  final AMapFlutterLocation _locationPlugin = AMapFlutterLocation();
-  // 监听定位
-  late StreamSubscription<Map<String, Object>> _locationListener;
 
   String userLocation ='你在哪里';
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-
-    /// 动态申请定位权限
-    LocationPermission.requestPermission();
-
-    ///iOS 获取native精度类型
-    if (Platform.isIOS) {
-      MapOption.requestAccuracyAuthorization(_locationPlugin);
-    }
-
-    ///设置是否已经取得用户同意，如果未取得用户同意，高德定位SDK将不会工作,这里传true
-    AMapFlutterLocation.updatePrivacyAgree(true);
-
-    /// 设置是否已经包含高德隐私政策并弹窗展示显示用户查看，如果未包含或者没有弹窗展示，高德定位SDK将不会工作,这里传true
-    AMapFlutterLocation.updatePrivacyShow(true, true);
-
-    ///注册定位结果监听
-    _locationListener = _locationPlugin
-        .onLocationChanged()
-        .listen((Map<String, Object> result) {
-      print(result);
-
-      setState(() {
-        _latitude = result["latitude"].toString();
-        _longitude = result["longitude"].toString();
-        province = result['province'].toString();
-        city = result['city'].toString();
-        district = result['district'].toString();
-
-      });
-    });
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-    ///移除定位监听
-    if (null != _locationListener) {
-      _locationListener.cancel();
-    }
-    if (null != _locationListener) {
-      _locationListener.cancel();
-    }
-
-    ///销毁定位
-    if (null != _locationPlugin) {
-      _locationPlugin.destroy();
-    }
-  }
 
 
   @override
@@ -319,7 +347,7 @@ class _CropResultViewState extends State<CropResultViews> {
           icon:TDIcons.location,
           title: userLocation,
           onTap:() async {
-            MapOption.startLocation(_locationPlugin,onceLocation: true);
+            MapOption.startLocation(widget.locationPlugin,onceLocation: true);
             // 显示加载指示器
             showLoadingIndicator();
             // 等待一小段时间（如果有回调或事件可用，也可以使用它们）
@@ -327,8 +355,7 @@ class _CropResultViewState extends State<CropResultViews> {
             // 隐藏加载指示器
             hideLoadingIndicator();
             setState(() {
-              // userLocation = _latitude +"--"+_longitude;
-              userLocation = province+city+district;
+              userLocation = widget.province+widget.city+widget.district;
             });
           }
       ),

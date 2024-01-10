@@ -75,6 +75,7 @@ dependencies:
   flutter_instagram_storyboard: ^0.0.8
   icons_plus: ^5.0.0
 
+  easy_refresh: ^3.3.4
   easy_search_bar: ^2.5.0
   dropdown_button2: ^2.3.9
 dev_dependencies:
