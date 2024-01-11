@@ -51,11 +51,27 @@ class MapOption{
     }
   }
 
+  ///获取iOS native的accuracyAuthorization类型
+  static void requestAccuracyAuthorization(AMapFlutterLocation initlocationPlugin) async {
+    AMapAccuracyAuthorization currentAccuracyAuthorization =
+    await initlocationPlugin.getSystemAccuracyAuthorization();
+    if (currentAccuracyAuthorization ==
+        AMapAccuracyAuthorization.AMapAccuracyAuthorizationFullAccuracy) {
+      print("精确定位类型");
+    } else if (currentAccuracyAuthorization ==
+        AMapAccuracyAuthorization.AMapAccuracyAuthorizationReducedAccuracy) {
+      print("模糊定位类型");
+    } else {
+      print("未知定位类型");
+    }
+  }
+
+
   ///开始定位
-  static void startLocation(AMapFlutterLocation initlocationPlugin) {
+  static void startLocation(AMapFlutterLocation initlocationPlugin,{required bool onceLocation}) {
     if (null != initlocationPlugin) {
       ///开始定位之前设置定位参数
-      MapOption.setLocationOption(initlocationPlugin,onceLocation: false);
+      MapOption.setLocationOption(initlocationPlugin,onceLocation: onceLocation);
       initlocationPlugin.startLocation();
     }
   }

@@ -75,10 +75,17 @@ dependencies:
   flutter_instagram_storyboard: ^0.0.8
   icons_plus: ^5.0.0
   rive: ^0.12.4
+
+  easy_refresh: ^3.3.4
   easy_search_bar: ^2.5.0
   dropdown_button2: ^2.3.9
   timelines: ^0.1.0
   stacked_card_carousel: ^0.0.4
+
+
+  #json解析
+
+  json_annotation: ^4.4.0
 
 dev_dependencies:
   flutter_test:
@@ -91,6 +98,8 @@ dev_dependencies:
   # rules and activating additional ones.
   flutter_lints: ^2.0.0
 
+  json_serializable: ^6.7.1
+  build_runner: ^2.0.0
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 

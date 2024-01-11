@@ -26,7 +26,7 @@ class _MemoryScreenState extends State<MemoryScreen> {
       });
     }
 
-    final response = await dio.get('http://192.168.29.1:8080/sceneryinformation', data: await createFormData());
+    final response = await dio.post('http://192.168.29.1:8080/sceneryinformation', data: await createFormData());
     final jsonData = JsonDecoder().convert(response.data);
     final image = jsonData[4]['image'];
     final description = jsonData[0]['description'].toString();

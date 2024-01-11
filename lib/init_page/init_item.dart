@@ -1,15 +1,20 @@
 
+import 'package:amap_flutter_base/amap_flutter_base.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:getwidget/components/appbar/gf_appbar.dart';
 import 'package:getwidget/components/button/gf_icon_button.dart';
 import 'package:getwidget/types/gf_button_type.dart';
 import 'package:tdesign_flutter/tdesign_flutter.dart';
+
 import 'package:travel/view/Classify_Screen.dart';
 import 'package:travel/view/User_Screen.dart';
 import 'package:travel/view/memory_Screen.dart';
 import 'package:travel/view/recommed_Screen.dart';
 
+import '../view/fetchData.dart';
+import '../view/memoryMap_Srceen.dart';
+import '../view/spaceView.dart';
 import '../view/Rive_Test2.dart';
 import '../view/cardpage.dart';
 import '../view/sliver.dart';
@@ -40,13 +45,14 @@ List<Widget> bottomBarItem = [
 List<Widget> pages =[
   RecommedScreen(),
   ClassifyScreen(),
-  RecommedScreen(),
+  SpaceView (),
   //MemoryScreen(),
   //MoreTypeStateChangeExample(),
   CardPage(),
   //StoryExamplePage(),
   UserScreen(),
   //CollapsingAppbarWithTabsPage(),
+
   //UserScreen(),
 ];
 

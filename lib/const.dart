@@ -1,15 +1,16 @@
-List<String> ImagesList = [
-  'assets/images/s1.png',
-  'assets/images/s2.png',
-  'assets/images/s3.png',
-  'assets/images/s4.png',
-  'assets/images/s5.png',
-  'assets/images/s6.png',
-  'assets/images/s7.png',
-  'assets/images/s1.png',
-  'assets/images/s2.png',
-  'assets/images/s3.png',
-];
+// List<String> ImagesList = [
+//   'assets/images/s1.png',
+//   'assets/images/s2.png',
+//   'assets/images/s3.png',
+//   'assets/images/s4.png',
+//   'assets/images/s5.png',
+//   'assets/images/s6.png',
+//   'assets/images/s7.png',
+//   'assets/images/s1.png',
+//   'assets/images/s2.png',
+//   'assets/images/s3.png',
+// ];
+
 List<String> CityList = [
   'Islambad',
   'Karachi',
