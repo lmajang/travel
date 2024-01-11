@@ -169,7 +169,6 @@ class _mapScreenState extends State<mapScreen>{
 
 
   List<Widget> _approvalNumberWidget = [];
-  late Size screenSize= MediaQuery.of(context).size;
 
 
   @override

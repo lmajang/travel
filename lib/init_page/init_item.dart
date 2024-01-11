@@ -1,16 +1,20 @@
 
+import 'package:amap_flutter_base/amap_flutter_base.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:getwidget/components/appbar/gf_appbar.dart';
 import 'package:getwidget/components/button/gf_icon_button.dart';
 import 'package:getwidget/types/gf_button_type.dart';
 import 'package:tdesign_flutter/tdesign_flutter.dart';
-import 'package:travel/init_page/refresh_component.dart';
+
 import 'package:travel/view/Classify_Screen.dart';
 import 'package:travel/view/User_Screen.dart';
 import 'package:travel/view/memory_Screen.dart';
 import 'package:travel/view/recommed_Screen.dart';
 
+import '../view/fetchData.dart';
+import '../view/memoryMap_Srceen.dart';
+import '../view/spaceView.dart';
 import '../view/test.dart';
 import '../view/test2.dart';
 
@@ -39,10 +43,11 @@ List<Widget> bottomBarItem = [
 List<Widget> pages =[
   RecommedScreen(),
   ClassifyScreen(),
-  RecommedScreen(),
+  SpaceView (),
   //MemoryScreen(),
   //StoryExamplePage(),
-  BuildRefreshComponent(),
+
+  MemoryMapSrceen(LatLngPions: [LatLng(39.909187, 116.397451),LatLng(40.909187, 110.397451),LatLng(30.22753, 120.0401)]),//39.909187 116.397451 30.22753386223114, 120.04012871067401
   CollapsingAppbarWithTabsPage(),
   //UserScreen(),
 ];
