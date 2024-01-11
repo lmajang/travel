@@ -20,6 +20,7 @@ import 'package:http/http.dart' as http;
 import '../aMap_tool/DistanceCalculator.dart';
 import '../aMap_tool/getLocationPermission.dart';
 import '../aMap_tool/initMapOption.dart';
+import '../widgets/crop_result_view.dart';
 
 
 class mapScreen extends StatefulWidget {

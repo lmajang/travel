@@ -17,12 +17,15 @@ class CollapsingAppbarWithTabsPage extends StatefulWidget {
 
 class _CollapsingAppbarWithTabsPageState extends State<CollapsingAppbarWithTabsPage> {
 
-  final List<String> path=[
-    'p1.png','p5.png','p12.png','p13.png','p20.png','p21.png',
-    'p2.png','p6.png','p11.png','p14.png','p19.png','p22.png',
-    'p3.png','p7.png','p10.png','p15.png','p18.png','p23.png',
-    'p4.png','p8.png','p9.png','p16.png','p17.png','p24.png'
+  final List<String> path = [
+    'p1.png', 'p5.png', 'p12.png', 'p13.png', 'p20.png', 'p21.png',
+    'p2.png', 'p6.png', 'p11.png', 'p14.png', 'p19.png', 'p22.png',
+    'p3.png', 'p7.png', 'p10.png', 'p15.png', 'p18.png', 'p23.png',
+    'p4.png', 'p8.png', 'p9.png', 'p16.png', 'p17.png', 'p24.png',
+    'p1.png', 'p5.png', 'p12.png', 'p13.png', 'p20.png', 'p21.png',
+    'p2.png', 'p6.png', 'p11.png', 'p14.png', 'p19.png', 'p22.png',
   ];
+
   final List<String> headers=["h10","h5","h6","h2","h4","h3","h2","h7"];
 
   Widget _buildProfileView(){
@@ -328,7 +331,6 @@ class _CollapsingAppbarWithTabsPageState extends State<CollapsingAppbarWithTabsP
                     indicatorSize: TabBarIndicatorSize.tab,
                     labelColor: Colors.black,
                     unselectedLabelColor: Colors.grey,
-
                     tabs: _tabs,
                   ),
                 ),

@@ -10,8 +10,10 @@ import 'package:travel/view/User_Screen.dart';
 import 'package:travel/view/memory_Screen.dart';
 import 'package:travel/view/recommed_Screen.dart';
 
+import '../view/Rive_Test2.dart';
+import '../view/cardpage.dart';
+import '../view/sliver.dart';
 import '../view/test.dart';
-import '../view/test2.dart';
 
 List<Widget> bottomBarItem = [
   Icon(TDIcons.home,
@@ -40,9 +42,11 @@ List<Widget> pages =[
   ClassifyScreen(),
   RecommedScreen(),
   //MemoryScreen(),
+  //MoreTypeStateChangeExample(),
+  CardPage(),
   //StoryExamplePage(),
-  CollapsingAppbarWithTabsPages(),
-  CollapsingAppbarWithTabsPage(),
+  UserScreen(),
+  //CollapsingAppbarWithTabsPage(),
   //UserScreen(),
 ];
 

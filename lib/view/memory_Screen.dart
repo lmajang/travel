@@ -41,7 +41,6 @@ class _MemoryScreenState extends State<MemoryScreen> {
     Size scrSize = MediaQuery.of(context).size;
     return Scaffold(
       appBar: initAppbar(),
-      body: Text('回忆录'),
         body: Container(
           height: scrSize.height,
           width: scrSize.width,

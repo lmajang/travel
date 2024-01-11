@@ -74,9 +74,12 @@ dependencies:
   photo_manager: ^3.0.0-dev.2
   flutter_instagram_storyboard: ^0.0.8
   icons_plus: ^5.0.0
-
+  rive: ^0.12.4
   easy_search_bar: ^2.5.0
   dropdown_button2: ^2.3.9
+  timelines: ^0.1.0
+  stacked_card_carousel: ^0.0.4
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -106,6 +109,7 @@ flutter:
     - assets/district/
     - assets/areaList/
     - assets/profileImages/
+    - assets/rives/
   fonts:
     - family: Finesse
       fonts:
